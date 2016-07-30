@@ -143,8 +143,8 @@ void alg3_ff() {
 	cosval_new = cosval * cosdiff - sinval * sindiff;
 	sinval = sinval * cosdiff + cosval * sindiff;
 	cosval = cosval_new;
-	costable3_f[i] = cosval;
-	sintable3_f[i] = sinval;
+	costable3_ff[i] = cosval;
+	sintable3_ff[i] = sinval;
     }
 }
 
