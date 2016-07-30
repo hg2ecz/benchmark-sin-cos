@@ -8,6 +8,9 @@ CFLAGS+=-mcpu=cortex-a5 -mfpu=neon-fp16
 #CFLAGS+=-mcpu=cortex-a15 -mfpu=neon-vfpv4
 #CFLAGS+=-mcpu=cortex-a53 -mfpu=neon-fp-armv8
 
+#CFLAGS+=-std=gnu90
+#CFLAGS+=-std=c99
+
 LDFLAGS=-lm -s
 OBJS=benchmark-sin-cos.o
 
