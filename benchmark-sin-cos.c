@@ -90,6 +90,9 @@ double costable3[TLEN];
 float sintable3_f[TLEN];
 float costable3_f[TLEN];
 
+float sintable3_ff[TLEN];
+float costable3_ff[TLEN];
+
 void alg3() {
     int i;
     double cosdiff = cos(2*M_PI/TLEN);
@@ -126,10 +129,30 @@ void alg3_f() {
     }
 }
 
+// warning: accumulating inaccuracies
+void alg3_ff() {
+    int i;
+    float cosdiff = cos(2*M_PI/TLEN); // double, else accumulating inaccuracies
+    float sindiff = sin(2*M_PI/TLEN); // double, else accumulating inaccuracies
+    float cosval = 1.; // double, else accumulating inaccuracies
+    float sinval = 0.; // double, else accumulating inaccuracies
+    float cosval_new;  // double, else accumulating inaccuracies
+    costable3_f[0] = cosval;
+    sintable3_f[0] = sinval;
+    for (i=1; i<TLEN; i++) {
+	cosval_new = cosval * cosdiff - sinval * sindiff;
+	sinval = sinval * cosdiff + cosval * sindiff;
+	cosval = cosval_new;
+	costable3_f[i] = cosval;
+	sintable3_f[i] = sinval;
+    }
+}
+
 // rotating phasor2 - with complex.h ... alg double, resultvector double and float
 #include <complex.h>
 complex double sincostable3_c[TLEN];
 complex float  sincostable3_c_f[TLEN];
+complex float  sincostable3_c_ff[TLEN];
 
 void alg3_c() {
     int i;
@@ -145,11 +168,23 @@ void alg3_c() {
 void alg3_c_f() {
     int i;
     double complex sincosdiff_c = cos(2*M_PI/TLEN) + sin(2*M_PI/TLEN)*I;
-    double complex sincosval = 1. + 0.*I; // double, else accumulation error
+    double complex sincosval = 1. + 0.*I;
     sincostable3_c[0] = sincosval;
     for (i=1; i<TLEN; i++) {
 	sincosval *= sincosdiff_c;
 	sincostable3_c_f[i] = sincosval;
+    }
+}
+
+// warning: accumulating inaccuracies
+void alg3_c_ff() {
+    int i;
+    float complex sincosdiff_c = cos(2*M_PI/TLEN) + sin(2*M_PI/TLEN)*I; // double, else accumulating inaccuracies
+    float complex sincosval = 1. + 0.*I; // double, else accumulating inaccuracies
+    sincostable3_c[0] = sincosval;
+    for (i=1; i<TLEN; i++) {
+	sincosval *= sincosdiff_c;
+	sincostable3_c_ff[i] = sincosval;
     }
 }
 
@@ -191,6 +226,9 @@ int main(int argc, char **argv) {
     timetest(alg2_f, "float alg2: sincosf()", offset_f);
     timetest(alg3_f, "float alg3: phasor rotate", offset_f);
     timetest(alg3_c_f, "float alg3: complex.h phasor rotate", offset_f);
+    printf("\n");
+    timetest(alg3_ff, "float-float alg3: phasor rotate", offset_f);
+    timetest(alg3_c_ff, "float-float alg3: complex.h phasor rotate", offset_f);
 
     if (argc != 2) return -1;
     test = atoi(argv[1]);
@@ -204,6 +242,8 @@ int main(int argc, char **argv) {
     printf("diff alg2f-alg1: %f and %f\n", costable2_f[test] - costable1[test], sintable2_f[test] - sintable1[test]);
     printf("diff alg3f -alg1: %f and %f\n", costable3_f[test] - costable1[test], sintable3_f[test] - sintable1[test]);
     printf("diff alg3cf-alg1: %f and %f\n", creal(sincostable3_c_f[test]) - costable1[test], cimag(sincostable3_c_f[test]) - sintable1[test]);
+    printf("\ndiff alg3ff -alg1: %f and %f (inaccurate)\n", costable3_ff[test] - costable1[test], sintable3_f[test] - sintable1[test]);
+    printf("diff alg3cff-alg1: %f and %f (inaccurate)\n", creal(sincostable3_c_ff[test]) - costable1[test], cimag(sincostable3_c_f[test]) - sintable1[test]);
 
     return 0;
 }
