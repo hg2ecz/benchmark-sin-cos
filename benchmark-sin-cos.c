@@ -30,6 +30,14 @@ void alg99_copytime_float() {
     }
 }
 
+void alg99_for_cycle() {
+    int i;
+    for (i=1; i<TLEN; i++) {
+	asm __volatile__ ("nop");
+    }
+}
+
+
 // simple cos() and sin() ... and float
 double sintable1[TLEN];
 double costable1[TLEN];
@@ -169,7 +177,7 @@ void alg3_c_f() {
     int i;
     double complex sincosdiff_c = cos(2*M_PI/TLEN) + sin(2*M_PI/TLEN)*I;
     double complex sincosval = 1. + 0.*I;
-    sincostable3_c[0] = sincosval;
+    sincostable3_c_f[0] = sincosval;
     for (i=1; i<TLEN; i++) {
 	sincosval *= sincosdiff_c;
 	sincostable3_c_f[i] = sincosval;
@@ -181,10 +189,26 @@ void alg3_c_ff() {
     int i;
     float complex sincosdiff_c = cos(2*M_PI/TLEN) + sin(2*M_PI/TLEN)*I; // double, else accumulating inaccuracies
     float complex sincosval = 1. + 0.*I; // double, else accumulating inaccuracies
-    sincostable3_c[0] = sincosval;
+    sincostable3_c_ff[0] = sincosval;
     for (i=1; i<TLEN; i++) {
 	sincosval *= sincosdiff_c;
 	sincostable3_c_ff[i] = sincosval;
+    }
+}
+
+#define CONSTMUL (1<<29)
+
+complex int sincostable4_c_i[TLEN];
+
+// integer!
+void alg4_c_i() {
+    int i;
+    int complex sincosdiff_c = CONSTMUL * cos(2*M_PI/TLEN) + CONSTMUL * sin(2*M_PI/TLEN)*I; // double, else accumulating inaccuracies
+    int complex sincosval = CONSTMUL*1. + CONSTMUL*0.*I; // double, else accumulating inaccuracies
+    sincostable4_c_i[0] = sincosval;
+    for (i=1; i<TLEN; i++) {
+	sincosval = ((long long)sincosval * sincosdiff_c) / CONSTMUL;
+	sincostable4_c_i[i] = sincosval;
     }
 }
 
@@ -216,6 +240,7 @@ int main(int argc, char **argv) {
     printf("Fill sin and cos table %d elements with different method. Printed result: algtime (algtime-copytime)\n", TLEN);
     offset=timetest(alg99_copytime, "double time of data copy", 0);
     offset_f=timetest(alg99_copytime_float, "float time of data copy", 0);
+    timetest(alg99_for_cycle, "for cycle with internal \"nop\"", 0);
     printf("\n");
     timetest(alg1, "double alg1: sin és cos", offset);
     timetest(alg2, "double alg2: sincos()", offset);
@@ -229,6 +254,8 @@ int main(int argc, char **argv) {
     printf("\n");
     timetest(alg3_ff, "float-float alg3: phasor rotate", offset_f);
     timetest(alg3_c_ff, "float-float alg3: complex.h phasor rotate", offset_f);
+    printf("\n");
+    timetest(alg4_c_i, "integer alg4: phasor rotate", offset_f);
 
     if (argc != 2) return -1;
     test = atoi(argv[1]);
@@ -244,6 +271,7 @@ int main(int argc, char **argv) {
     printf("diff alg3cf-alg1: %f and %f\n", creal(sincostable3_c_f[test]) - costable1[test], cimag(sincostable3_c_f[test]) - sintable1[test]);
     printf("\ndiff alg3ff -alg1: %f and %f (inaccurate)\n", costable3_ff[test] - costable1[test], sintable3_f[test] - sintable1[test]);
     printf("diff alg3cff-alg1: %f and %f (inaccurate)\n", creal(sincostable3_c_ff[test]) - costable1[test], cimag(sincostable3_c_f[test]) - sintable1[test]);
+    printf("diff alg4_c_i-alg1: %f and %f (inaccurate)\n", creal(sincostable4_c_i[test]/(double)CONSTMUL) - costable1[test], cimag(sincostable4_c_i[test]/(double)CONSTMUL) - sintable1[test]);
 
     return 0;
 }
