@@ -22,15 +22,17 @@ unsigned long long t_end(const char *txt) {
 #include <stdlib.h>
 
 int main(int argc, char **argv) {
-    int i;
     float complex *res_f = malloc(BUFSIZE*sizeof(float complex));
     double complex *res_d = malloc(BUFSIZE*sizeof(double complex));
     struct _vfo vfo = { 0 + I*0, cos(0.001) + I*sin(0.001) };
 
+    double complex *res_testd = malloc(1000*1000*sizeof(double complex));
+
     printf("\n\nalg3: complex.h phasor rotate, BUFSIZE: %d kB, internal LOOP: %d\n", BUFSIZE/1024, INTERNAL);
     printf("Please tune the BUFSIZE_KB and INTERNAL_2N parameters in the Makefile and recompile this test.\n\n");
 
-    for (i=0; i<1000*1000; i++) __asm__ volatile ("nop");
+    alg3_c(res_testd, &vfo); // wake up! --> CPU from powersave to full tempo
+
     t_start(); alg3_c(res_d, &vfo); t_end("double - unoptimalized");
     t_start(); alg3_c_f(res_f, &vfo); t_end("float - unoptimalized");
     putchar('\n');
