@@ -14,7 +14,7 @@ unsigned long long t_end(const char *txt) {
     unsigned long long nsec = 1000*1000*1000*(gend.tv_sec - gstart.tv_sec) + gend.tv_nsec - gstart.tv_nsec;
     //if (offset > 0) printf("%7.2f (%7.2f) msec (%s)\n", nsec/1000./1000., (nsec-offset)/1000./1000., txt);
     //else
-    printf("%7.2f msec (%7.2f msec/1M) (%s)\n", nsec/1000./1000., (nsec/(double)BUFSIZE), txt);
+    printf("%7.2f msec (%6.2f msec/1M) (%s)\n", nsec/1000./1000., (nsec/(double)BUFSIZE), txt);
     return nsec;
 }
 
@@ -28,7 +28,7 @@ int main(int argc, char **argv) {
 
     double complex *res_testd = malloc(1000*1000*sizeof(double complex));
 
-    printf("\n\nalg3: complex.h phasor rotate, BUFSIZE: %d kB, internal LOOP: %d\n", BUFSIZE/1024, INTERNAL);
+    printf("\n\nalg3: complex.h phasor rotate, BUFSIZE: %dk (complex float/double num), internal LOOP: %d\n", BUFSIZE/1024, INTERNAL);
     printf("Please tune the BUFSIZE_KB and INTERNAL_2N parameters in the Makefile and recompile this test.\n\n");
 
     alg3_c(res_testd, &vfo); // wake up! --> CPU from powersave to full tempo
