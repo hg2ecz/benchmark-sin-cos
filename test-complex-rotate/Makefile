@@ -11,7 +11,7 @@ CFLAGS+=-mcpu=cortex-a5 -mfpu=neon-fp16
 #CFLAGS+=-std=gnu90
 #CFLAGS+=-std=c99
 
-# BUFSIZE --> larger is better, limit: CPU cache size
+# BUFSIZE --> larger is better, limit: memory
 # INTERNAL_2N --> 2^N internal loop (4 ==> 2^4 = 16)
 CFLAGS+=-DBUFSIZE_KB=10000 -DINTERNAL_2N=4
 
